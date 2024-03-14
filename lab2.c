@@ -33,6 +33,7 @@ char *string_concat(char *str1, char *str2);
 
 int main(int argc,char* argv[])
 {   
+    
     //insizlize names
     char* infile1 = malloc(64);
     char* infile2 = malloc(64);
@@ -56,7 +57,7 @@ int main(int argc,char* argv[])
     //False case
     else
     {
-        printf("unknown input format\nUsage: ./matMultp Mat1 Mat2 MatOut");
+        printf("unknown input format\nUsage: ./matMultp Mat1 Mat2 MatOut\nor ./matMultp set input to a b c");
         exit(EXIT_FAILURE);//exit of program
     }
     
@@ -71,7 +72,7 @@ int main(int argc,char* argv[])
     write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_matrix.txt"));
     
     gettimeofday(&stop, NULL); //end checking time
-    printf("for method 1\n");
+    printf("for thread per matrix\n");
     printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
     printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
 
@@ -81,7 +82,7 @@ int main(int argc,char* argv[])
     write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_row.txt"));
     	
     gettimeofday(&stop, NULL); //end checking time
-    printf("for method 2\n");
+    printf("for thread per row\n");
     printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
     printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
 
@@ -90,10 +91,16 @@ int main(int argc,char* argv[])
     write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_element.txt"));
     	
     gettimeofday(&stop, NULL); //end checking time
-    printf("for method 3\n");
+    printf("for thread per element\n");
     printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
     printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
 
+    // Free dynamically allocated memory
+    free(infile1);
+    free(infile2);
+    free(out_file);
+    
+    return 0;
 }
 
 matrix_t read_matrix_from_file(char *mat)
