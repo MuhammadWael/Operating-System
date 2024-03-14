@@ -4,11 +4,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <sys/time.h>
-/*
-      c_per_row.txt
-      c_per_element.txt
-     */
-#define MAX_NUMBERS 20
+
+#define MAX_NUMBERS 30
 typedef struct 
 {
     int row,col;
@@ -31,76 +28,71 @@ void perElement(matrix_t *mat1, matrix_t *mat2, matrix_t *result);
 void perRow(matrix_t *mat1, matrix_t *mat2, matrix_t *result);
 void *multiply_element(void *arg);
 void *multiply_row(void *arg);
-
-
 char *string_concat(char *str1, char *str2);
+
+
 int main(int argc,char* argv[])
 {   
+    //insizlize names
+    char* infile1 = malloc(64);
+    char* infile2 = malloc(64);
+    char* out_file = malloc(64);    
     //case of ./MatMul inMartix1 inMartix2 outMatrix
-    matrix_t mat1,mat2,resultMat;
-    /*set to defult values
-    char* out_file = "c";
-    char* infile1 = "a";
-    char* infile2 = "b";*/
     if(argc == 4)
-    {
-    	/*char *infile1 = (char *)malloc(sizeof(argv[1])/sizeof(char));
-    	strcpy(result, str1);
-    	in_file1 = argv[1];
-    	in_file2 = argv[2];*/
-        mat1 = read_matrix_from_file(string_concat(argv[1],".txt"));
-        mat2 = read_matrix_from_file(string_concat(argv[2],".txt"));
-        //for first method 
-        resultMat = perMatrix(mat1,mat2);
-        write_matrix_to_file(&resultMat ,string_concat(argv[3],"_per_matrix.txt"));
-        
-        perRow(&mat1,&mat2,&resultMat);
-        write_matrix_to_file(&resultMat ,string_concat(argv[3],"_per_row.txt"));
-        
-        perElement(&mat1,&mat2,&resultMat);
-        write_matrix_to_file(&resultMat ,string_concat(argv[3],"_per_element.txt"));
+    {	
+    	strcpy(infile1, argv[1]);
+    	strcpy(infile2, argv[2]);
+    	strcpy(out_file, argv[3]);
+
     }
     //case of ./MatMul 
     else if(argc == 1)
-    {
-        mat1 = read_matrix_from_file("a.txt");
-        mat2 = read_matrix_from_file("b.txt");
-        struct timeval stop, start;
-
-    	gettimeofday(&start, NULL); //start checking time
-    	
-        resultMat = perMatrix(mat1,mat2);
-        write_matrix_to_file(&resultMat ,string_concat("c","_per_matrix.txt"));
-    	
-    	gettimeofday(&stop, NULL); //end checking time
-	printf("for method 1\n");
-    	printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
-    	printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
+    {	//defult values of files a b c
+        strcpy(infile1, "a");
+    	strcpy(infile2, "b");
+    	strcpy(out_file, "c");
         
-	gettimeofday(&start, NULL); //start checking time
-       
-        perRow(&mat1,&mat2,&resultMat);
-        write_matrix_to_file(&resultMat ,string_concat("c","_per_row.txt"));
-            	
-    	gettimeofday(&stop, NULL); //end checking time
-	printf("for method 2\n");
-    	printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
-    	printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
-    	
-    	gettimeofday(&start, NULL); //start checking time
-        perElement(&mat1,&mat2,&resultMat);
-        write_matrix_to_file(&resultMat ,string_concat("c","_per_element.txt"));
-            	
-    	gettimeofday(&stop, NULL); //end checking time
-	printf("for method 3\n");
-    	printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
-    	printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
     }
     //False case
     else
     {
         printf("unknown input format\nUsage: ./matMultp Mat1 Mat2 MatOut");
+        exit(EXIT_FAILURE);//exit of program
     }
+    
+    matrix_t mat1,mat2,resultMat;
+    struct timeval stop, start;
+    mat1 = read_matrix_from_file(string_concat(infile1,".txt"));
+    mat2 = read_matrix_from_file(string_concat(infile2,".txt"));
+    
+    gettimeofday(&start, NULL); //start checking time
+    
+    resultMat = perMatrix(mat1,mat2);//running method 1
+    write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_matrix.txt"));
+    
+    gettimeofday(&stop, NULL); //end checking time
+    printf("for method 1\n");
+    printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
+    printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
+
+    gettimeofday(&start, NULL); //start checking time
+
+    perRow(&mat1,&mat2,&resultMat);
+    write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_row.txt"));
+    	
+    gettimeofday(&stop, NULL); //end checking time
+    printf("for method 2\n");
+    printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
+    printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
+
+    gettimeofday(&start, NULL); //start checking time
+    perElement(&mat1,&mat2,&resultMat);
+    write_matrix_to_file(&resultMat ,string_concat(out_file,"_per_element.txt"));
+    	
+    gettimeofday(&stop, NULL); //end checking time
+    printf("for method 3\n");
+    printf("Seconds taken %lu\n", stop.tv_sec - start.tv_sec);
+    printf("Microseconds taken: %lu\n", stop.tv_usec - start.tv_usec);
 
 }
 
@@ -120,7 +112,7 @@ matrix_t read_matrix_from_file(char *mat)
         {
             if (fscanf(file, "%d", &matrix.data[i][j]) != 1) {
                 printf("Error: Insufficient data in the file.\n");
-                exit(EXIT_FAILURE);
+                exit(EXIT_FAILURE);//exit of program
             }
         }
     }
@@ -155,14 +147,13 @@ matrix_t perMatrix(matrix_t mat_1,matrix_t mat_2)
 //rows of first must equal to coloumns of second 
 if(mat_1.col != mat_2.row)
 {
-	printf("Uncomapatble dimensions");
-	exit(1);
+	printf("Uncomapatble dimensions\n");
+	exit(EXIT_FAILURE);
 }
-//the result of multiplication should be  
 
 matrix_t result_matrix;
-
-int common = mat_1.col;
+int common = mat_1.col;// the common dimenstion of matrix
+//dimensions of resulted matrix
 result_matrix.row = mat_1.row;
 result_matrix.col = mat_2.col;
 
@@ -179,6 +170,7 @@ result_matrix.col = mat_2.col;
 	}
 	return result_matrix;
 }
+//to allocate memory for concatinating file names
 char *string_concat(char *str1, char *str2) {
     char *result = (char *)malloc(strlen(str1) + strlen(str2) + 1);
     strcpy(result, str1);
@@ -275,5 +267,4 @@ void *multiply_element(void *arg)
 
     pthread_exit(NULL);
 }
-
 
